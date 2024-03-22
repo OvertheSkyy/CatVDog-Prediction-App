@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Dogs and Cats Image Prediction App</title>
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+      integrity="sha384-4bw+/aepP/YC94hEpVNVgiZdgIC5+VKNBQNGCHeKRQN+PtmoHDEXuppvnDJzQIu9"
+      crossorigin="anonymous"
+    />
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  </head>
+  <body>
+    <header class="navbar bg-body-tertiary">
+      <div class="container-fluid">
+        <a class="navbar-brand" href="/">
+          Dogs and Cats Image Prediction App
+        </a>
+      </div>
+    </header>
+    <div class="d-flex flex-row p-3 main-content">
+      <main class="w-75 mx-3">
+        <input type="file" id="image-selector" accept="image/*" />
+        <button type="button" class="btn btn-primary" id="predict-button">
+          Predict
+        </button>
+        <h2>Predictions</h2>
+        <div>
+          <p>Dog Prediction: <span id="dog-prediction"></span></p>
+          <p>Cat Prediction: <span id="cat-prediction"></span></p>
+        </div>
+        <img id="selected-image" src="" />
+        <script>
+          let base64Image; // Declare base64Image globally
+
+          $(document).ready(function () {
+            // Function to handle image selection
+            $("#image-selector").change(function () {
+              let reader = new FileReader();
+              reader.onload = function (e) {
+                let dataURL = reader.result;
+                $("#selected-image").attr("src", dataURL);
+                base64Image = dataURL.replace(
+                  /^data:image\/[a-z]+;base64,/,
+                  ""
+                );
+                // Clear predictions when a new image is selected
+                $("#dog-prediction").text("");
+                $("#cat-prediction").text("");
+              };
+              reader.readAsDataURL($("#image-selector")[0].files[0]);
+            });
+          });
+
+          $(document).ready(function () {
+            $("#predict-button").click(function (event) {
+              if (base64Image) {
+                // Check if base64Image is defined before sending the POST request
+                // Send the POST request after the image has been selected and processed
+                const message = {
+                  image: base64Image,
+                };
+                console.log(message);
+                $.post(
+                  "/predict",
+                  JSON.stringify(message),
+                  function (response) {
+                    // Update the HTML with the predictions
+                    $("#dog-prediction").text(
+                      response.prediction.dog.toFixed(6)
+                    );
+                    $("#cat-prediction").text(
+                      response.prediction.cat.toFixed(6)
+                    );
+                  }
+                );
+              } else {
+                console.error("Image not selected or processed yet.");
+              }
+            });
+          });
+        </script>
+      </main>
+    </div>
+  </body>
+</html>
